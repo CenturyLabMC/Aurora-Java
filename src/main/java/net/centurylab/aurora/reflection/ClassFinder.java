@@ -27,7 +27,14 @@ public class ClassFinder
         File dir = new File(url.getFile());
         List<Class<?>> classes = new ArrayList<>();
 
-        for (File file : dir.listFiles())
+        File[] files = dir.listFiles();
+
+        if (files == null)
+        {
+            return new ArrayList<>();
+        }
+
+        for (File file : files)
         {
             classes.addAll(find(file, pkg));
         }
