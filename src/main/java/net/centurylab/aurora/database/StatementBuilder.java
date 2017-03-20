@@ -12,13 +12,14 @@ public abstract class StatementBuilder<T>
     protected final List<String>     tables      = new ArrayList<>();
     protected final List<OrderField> orderFields = new ArrayList<>();
 
-    protected QueryType     queryType     = QueryType.SELECT;
-    protected StringBuilder currentSql    = new StringBuilder();
-    protected boolean       useConditions = false;
-    protected boolean       useLimits     = false;
-    protected int           limit         = 0;
-    protected int           offset        = 0;
-    protected boolean       useOrdering   = false;
+    protected QueryType     queryType           = QueryType.SELECT;
+    protected StringBuilder currentSql          = new StringBuilder();
+    protected boolean       useConditions       = false;
+    protected boolean       useLimits           = false;
+    protected int           limit               = 0;
+    protected int           offset              = 0;
+    protected boolean       useOrdering         = false;
+    protected boolean       returnGeneratedKeys = false;
 
     protected Map<String, Object> values;
 
@@ -122,6 +123,14 @@ public abstract class StatementBuilder<T>
      * @return Current {@link StatementBuilder} instance
      */
     public abstract T removeOrderField(OrderField orderField);
+
+    /**
+     * Set to true if you need the generated key from the database
+     *
+     * @param returnGeneratedKeys New value
+     * @return Current {@link StatementBuilder} instance
+     */
+    public abstract T setReturnGeneratedKeys(boolean returnGeneratedKeys);
 
     /**
      * Creates a {@link PreparedStatement} with the current query

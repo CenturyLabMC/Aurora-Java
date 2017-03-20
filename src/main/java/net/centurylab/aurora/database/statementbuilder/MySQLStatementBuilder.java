@@ -7,6 +7,7 @@ import net.centurylab.aurora.database.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.UUID;
 
@@ -237,6 +238,29 @@ public class MySQLStatementBuilder extends StatementBuilder<MySQLStatementBuilde
     }
 
     /**
+     * Returns true if the MySQL-Server should return true the generated id
+     *
+     * @return True if the MySQL should return the generated id, otherwise false
+     */
+    public boolean getReturnGeneratedKeys()
+    {
+        return this.returnGeneratedKeys;
+    }
+
+    /**
+     * Set to true if you need the generated key from the database
+     *
+     * @param returnGeneratedKeys New value
+     * @return Current {@link StatementBuilder} instance
+     */
+    @Override
+    public MySQLStatementBuilder setReturnGeneratedKeys(boolean returnGeneratedKeys)
+    {
+        this.returnGeneratedKeys = returnGeneratedKeys;
+        return this;
+    }
+
+    /**
      * Creates a {@link PreparedStatement} with the current query
      *
      * @return The {@link PreparedStatement} which can be executed
@@ -412,7 +436,14 @@ public class MySQLStatementBuilder extends StatementBuilder<MySQLStatementBuilde
         {
             Connection connection = database.getConnection();
 
-            statement = connection.prepareStatement(this.currentSql.toString());
+            if (this.returnGeneratedKeys)
+            {
+                statement = connection.prepareStatement(this.currentSql.toString(), Statement.RETURN_GENERATED_KEYS);
+            }
+            else
+            {
+                statement = connection.prepareStatement(this.currentSql.toString());
+            }
 
             if (this.currentSql.toString().contains("?"))
             {
