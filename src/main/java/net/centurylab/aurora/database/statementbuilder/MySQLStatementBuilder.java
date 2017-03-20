@@ -101,6 +101,9 @@ public class MySQLStatementBuilder extends StatementBuilder<MySQLStatementBuilde
         this.queryType = QueryType.SELECT;
         this.useConditions = false;
         this.conditions.clear();
+        this.fields.clear();
+        this.tables.clear();
+        this.orderFields.clear();
         this.currentSql = new StringBuilder();
         this.useLimits = false;
         this.limit = 0;
@@ -419,7 +422,7 @@ public class MySQLStatementBuilder extends StatementBuilder<MySQLStatementBuilde
 
                     // TODO: Use serializer
 
-                    for (int i = 0; index < values.values().size(); index++)
+                    for (; index < values.values().size(); index++)
                     {
                         Object o = values.values().toArray()[index];
 
