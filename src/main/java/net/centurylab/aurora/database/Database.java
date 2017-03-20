@@ -226,4 +226,37 @@ public abstract class Database
         this.connectionPool.setPassword(password);
         return this;
     }
+
+    /**
+     * Closes the given {@link PreparedStatement}
+     *
+     * @param preparedStatement The {@link PreparedStatement} to close
+     */
+    protected void closePreparedStatement(PreparedStatement preparedStatement)
+    {
+        try
+        {
+            if (preparedStatement.getResultSet() != null)
+            {
+                if (!preparedStatement.getResultSet().isClosed())
+                {
+                    preparedStatement.getResultSet().close();
+                }
+            }
+
+            if (!preparedStatement.getConnection().isClosed())
+            {
+                preparedStatement.getConnection().close();
+            }
+
+            if (!preparedStatement.isClosed())
+            {
+                preparedStatement.close();
+            }
+        }
+        catch (SQLException e)
+        {
+            LogManager.getLogger(Database.class).error(e, "Could not close the PreparedStatement");
+        }
+    }
 }

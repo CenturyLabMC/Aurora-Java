@@ -55,21 +55,19 @@ public class MySQLDatabase extends Database
             @Override
             public void subscribe(ObservableEmitter<ParsedResultSet> e) throws Exception
             {
+                ParsedResultSet parsedResultSet;
+
                 if (preparedStatement.execute())
                 {
-                    e.onNext(new ParsedResultSet(preparedStatement.getResultSet()));
+                    parsedResultSet = new ParsedResultSet(preparedStatement.getResultSet());
                 }
                 else
                 {
-                    e.onNext(new ParsedResultSet(preparedStatement.getUpdateCount()));
+                    parsedResultSet = new ParsedResultSet(preparedStatement.getUpdateCount());
                 }
 
-                if (preparedStatement.getResultSet() != null)
-                {
-                    preparedStatement.getResultSet().close();
-                }
-                preparedStatement.getConnection().close();
-                preparedStatement.close();
+                MySQLDatabase.this.closePreparedStatement(preparedStatement);
+                e.onNext(parsedResultSet);
                 e.onComplete();
             }
         });
