@@ -44,7 +44,7 @@ public class CommonFunctions
             rows++;
         }
 
-        resultSet.beforeFirst();
+        resultSet.first();
 
         return rows;
     }

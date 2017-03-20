@@ -2,6 +2,7 @@ package net.centurylab.aurora.database;
 
 import net.centurylab.aurora.utilities.CommonFunctions;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -13,35 +14,73 @@ public class ParsedResultSet
 {
     private List<Map<String, String>> rows;
     private int                       updateCount;
+    private int[]                     generatedKeys;
 
-    public ParsedResultSet(ResultSet resultSet)
+    public ParsedResultSet(PreparedStatement preparedStatement, QueryType queryType, boolean returnGeneratedKeys) throws SQLException
     {
         try
         {
-            this.rows = new ArrayList<>(CommonFunctions.getRowCount(resultSet));
-            this.updateCount = -1;
-
-            while (resultSet.next())
+            if (queryType == QueryType.SELECT)
             {
-                Map<String, String> dbValues = new HashMap<>();
+                preparedStatement.execute();
+            }
+            else
+            {
+                preparedStatement.executeUpdate();
+            }
 
-                for (int i = 1; i < resultSet.getMetaData().getColumnCount() + 1; i++)
-                {
-                    dbValues.put(resultSet.getMetaData().getColumnName(i), resultSet.getString(i));
-                }
+            switch (queryType)
+            {
+                case SELECT:
+                    this.updateCount = -1;
+                    this.rows = new ArrayList<>(CommonFunctions.getRowCount(preparedStatement.getResultSet()));
+                    this.updateCount = -1;
 
-                this.rows.add(dbValues);
+                    while (preparedStatement.getResultSet().next())
+                    {
+                        Map<String, String> dbValues = new HashMap<>();
+
+                        for (int i = 1; i < preparedStatement.getResultSet().getMetaData().getColumnCount() + 1; i++)
+                        {
+                            dbValues.put(preparedStatement.getResultSet().getMetaData().getColumnName(i), preparedStatement.getResultSet().getString(i));
+                        }
+
+                        this.rows.add(dbValues);
+                    }
+                    break;
+                case INSERT:
+                    this.updateCount = preparedStatement.getUpdateCount();
+                    this.rows = null;
+
+                    if (returnGeneratedKeys)
+                    {
+                        this.generatedKeys = new int[CommonFunctions.getRowCount(preparedStatement.getGeneratedKeys())];
+                        int index = 0;
+                        ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+                        while (resultSet.next())
+                        {
+                            this.generatedKeys[index] = resultSet.getInt(1);
+                            index++;
+                        }
+                    }
+                    else
+                    {
+                        this.generatedKeys = null;
+                    }
+                    break;
+                case DELETE:
+                case UPDATE:
+                    this.updateCount = preparedStatement.getUpdateCount();
+                    this.rows = null;
+                    this.generatedKeys = null;
+                    break;
             }
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            throw e;
         }
-    }
-
-    public ParsedResultSet(int updateCount)
-    {
-        this.updateCount = updateCount;
     }
 
     public int getUpdateCount()
@@ -131,6 +170,11 @@ public class ParsedResultSet
         this.check();
 
         return Double.parseDouble(this.rows.get(index).get(columnName));
+    }
+
+    public int[] getGeneratedKeys()
+    {
+        return generatedKeys;
     }
 
     private void check() throws Exception

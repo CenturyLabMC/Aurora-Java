@@ -133,6 +133,16 @@ public abstract class StatementBuilder<T>
     public abstract T setReturnGeneratedKeys(boolean returnGeneratedKeys);
 
     /**
+     * Returns true when the database driver should return the generated keys
+     *
+     * @return True if the database driver should return the generated keys, otherwise false
+     */
+    public boolean isReturnGeneratedKeys()
+    {
+        return returnGeneratedKeys;
+    }
+
+    /**
      * Creates a {@link PreparedStatement} with the current query
      *
      * @param database The database where the query should be executed against

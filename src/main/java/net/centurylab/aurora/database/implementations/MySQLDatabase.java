@@ -1,11 +1,10 @@
 package net.centurylab.aurora.database.implementations;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 
 import net.centurylab.aurora.database.Database;
 import net.centurylab.aurora.database.ParsedResultSet;
+import net.centurylab.aurora.database.StatementBuilder;
 
 import java.sql.PreparedStatement;
 
@@ -44,32 +43,20 @@ public class MySQLDatabase extends Database
     /**
      * Executes a {@link PreparedStatement}
      *
-     * @param preparedStatement The {@link PreparedStatement}
+     * @param statementBuilder The {@link StatementBuilder}
      * @return An {@link Observable} which pushes the result
      */
     @Override
-    public Observable<ParsedResultSet> execute(PreparedStatement preparedStatement)
+    public Observable<ParsedResultSet> execute(StatementBuilder statementBuilder)
     {
-        Observable<ParsedResultSet> observable = Observable.create(new ObservableOnSubscribe<ParsedResultSet>()
+        PreparedStatement preparedStatement = statementBuilder.build(this);
+
+        Observable<ParsedResultSet> observable = Observable.create(e ->
         {
-            @Override
-            public void subscribe(ObservableEmitter<ParsedResultSet> e) throws Exception
-            {
-                ParsedResultSet parsedResultSet;
-
-                if (preparedStatement.execute())
-                {
-                    parsedResultSet = new ParsedResultSet(preparedStatement.getResultSet());
-                }
-                else
-                {
-                    parsedResultSet = new ParsedResultSet(preparedStatement.getUpdateCount());
-                }
-
-                MySQLDatabase.this.closePreparedStatement(preparedStatement);
-                e.onNext(parsedResultSet);
-                e.onComplete();
-            }
+            ParsedResultSet parsedResultSet = new ParsedResultSet(preparedStatement, statementBuilder.getQueryType(), statementBuilder.isReturnGeneratedKeys());
+            MySQLDatabase.this.closePreparedStatement(preparedStatement);
+            e.onNext(parsedResultSet);
+            e.onComplete();
         });
 
         return observable;

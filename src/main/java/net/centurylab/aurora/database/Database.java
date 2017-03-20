@@ -134,10 +134,10 @@ public abstract class Database
     /**
      * Executes a {@link PreparedStatement}
      *
-     * @param preparedStatement The {@link PreparedStatement}
+     * @param statementBuilder The {@link StatementBuilder}
      * @return An {@link Observable} which pushes the result
      */
-    public abstract Observable<ParsedResultSet> execute(PreparedStatement preparedStatement);
+    public abstract Observable<ParsedResultSet> execute(StatementBuilder statementBuilder);
 
     public HikariDataSource getConnectionPool()
     {

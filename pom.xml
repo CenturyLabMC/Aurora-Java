@@ -93,7 +93,7 @@
                         <detail>true</detail>
                     </configuration>
                 </plugin>
-                
+
             </plugins>
         </pluginManagement>
 
