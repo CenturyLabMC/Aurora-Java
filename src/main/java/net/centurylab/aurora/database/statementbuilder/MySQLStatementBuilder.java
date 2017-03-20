@@ -110,6 +110,7 @@ public class MySQLStatementBuilder extends StatementBuilder<MySQLStatementBuilde
         this.limit = 0;
         this.offset = 0;
         this.useOrdering = false;
+        this.returnGeneratedKeys = false;
 
         return this;
     }

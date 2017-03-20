@@ -19,6 +19,7 @@ public class ParsedResultSet
         try
         {
             this.rows = new ArrayList<>(CommonFunctions.getRowCount(resultSet));
+            this.updateCount = -1;
 
             while (resultSet.next())
             {
